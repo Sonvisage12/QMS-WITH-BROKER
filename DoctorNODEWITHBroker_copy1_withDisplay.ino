@@ -9,18 +9,18 @@
 // === Pins and Config ===
 #define RST_PIN         5
 #define SS_PIN          4
-#define GREEN_LED_PIN   2
+#define GREEN_LED_PIN   16
 #define RED_LED_PIN     15
 #define BTN_REQUEST_PIN 32
 #define BTN_CLEAR1_PIN  33
 #define BTN_CLEAR2_PIN  34
 #define WIFI_SSID       "SonvisageAirtel"
 #define WIFI_PASSWORD   "@sonvisage2012"
-#define MQTT_BROKER     "192.168.1.236"
+#define MQTT_BROKER     "192.168.0.149"
 #define MQTT_PORT       1883
 
 
-const int nodeID = 4;
+const int nodeID = 2;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 WiFiClient espClient;
@@ -131,7 +131,7 @@ void connectToWiFi() {
 void reconnectMQTT() { lcd.clear();
   while (!mqttClient.connected()) {
     Serial.print("Connecting to MQTT...");
-    if (mqttClient.connect("DoctorNode4")) { // this most be change
+    if (mqttClient.connect("DoctorNode2")) { // this most be change
       Serial.println(" connected.");
       lcd.clear();
       mqttClient.subscribe(subTopic);
