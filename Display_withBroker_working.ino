@@ -12,7 +12,7 @@ const int nodeID = 4;
 int currentNumber = 0;
 int Number=0;
 int Number1=0;
-Ticker display_ticker;
+
 #define P_LAT 16  // D0
 #define P_A 5     // D1
 #define P_B 4     // D2
@@ -22,6 +22,7 @@ Ticker display_ticker;
 #define P_E 0     // GND (no connection)
 WiFiClient espClient;
 PxMATRIX display(128, 32, P_LAT, P_OE, P_A, P_B, P_C, P_D);
+Ticker display_ticker;
 uint16_t myRED = display.color565(255, 0, 0);
 uint16_t myBLUE = display.color565( 0, 0,255);
 volatile bool updateDisplay = false;
@@ -32,7 +33,7 @@ PubSubClient mqttClient(espClient);
 char topicToSubscribe[64];
 
 void display_updater() {
-  display.display(60);
+  display.display(255);
 }
 void connectToWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -104,40 +105,27 @@ void drawNumber(int num) {
 }
 
 void setup() {
-  Serial.begin(115200);
-  //WiFi.mode(WIFI_STA);  // Set to station mode (client)
-  //WiFi.begin(ssid, password);
-connectToWiFi();
-  //Serial.print("📡 Connecting to WiFi");
-
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(500);
-  //   Serial.print(".");
-  // }
-
-  // Serial.println("\n✅ Connected!");
-  // Serial.print("📶 IP Address: ");
-  // Serial.println(WiFi.localIP());
+  Serial.begin(115200); 
 display.begin(16);
-  display.setTextColor(myBLUE);
+ display.setFastUpdate(true);
   display.clearDisplay();
   display_ticker.attach(0.008, display_updater);
 display.setCursor(5, 1);
   display.setTextSize(2);
+   display.setTextColor(myBLUE);
   display.print("MEDIBOARDS");
   display.setCursor(5, 17);
   display.print("SONVISAGE");
   display.showBuffer();
-  //display.fillScreen(myRED);
-display.showBuffer();
-delay(3000);
+
+  delay(6000);
+  connectToWiFi();
+  display.clearDisplay();
   sprintf(topicToSubscribe, "clinic/display/%d", nodeID);
   mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
   mqttClient.setKeepAlive(60);
   mqttClient.setCallback(callback);
-  delay(6000);
-
-  display.clearDisplay();
+  
 
 }
 
