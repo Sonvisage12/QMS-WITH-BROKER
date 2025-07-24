@@ -7,7 +7,7 @@
 #define MQTT_BROKER      "192.168.0.149"
 #define MQTT_PORT        1883
 
-const int nodeID = 2;
+const int nodeID = 4;
 
 int currentNumber = 0;
 int Number=0;
@@ -32,7 +32,7 @@ PubSubClient mqttClient(espClient);
 char topicToSubscribe[64];
 
 void display_updater() {
-  display.display(100);
+  display.display(60);
 }
 void connectToWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -121,7 +121,7 @@ connectToWiFi();
 display.begin(16);
   display.setTextColor(myBLUE);
   display.clearDisplay();
-  display_ticker.attach(0.002, display_updater);
+  display_ticker.attach(0.008, display_updater);
 display.setCursor(5, 1);
   display.setTextSize(2);
   display.print("MEDIBOARDS");
