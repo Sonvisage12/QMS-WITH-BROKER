@@ -134,6 +134,9 @@ def on_message(client, userdata, msg):
         elif topic_parts[0] == "clinic" and topic_parts[1] == "doctor" and topic_parts[3] == "request":
             doctor_node = topic_parts[2]
             response_topic = f"clinic/doctor/{doctor_node}/response"
+            display_topic = f"clinic/display/{doctor_node}/number"  # NEW
+           
+
 
             blendedQueue = build_blended_queue(list(sharedQueue), list(queueB))
             if blendedQueue:
@@ -163,10 +166,40 @@ def on_message(client, userdata, msg):
 
                 client.publish(response_topic, json.dumps(response))
                 print(f"✅ Sent patient {patient} (#{mapped_number}) from {patient_queue} to doctor {doctor_node}")
+                client.publish(display_topic, json.dumps({"number": mapped_number}))
+                print(f"📺 Display update sent to {display_topic}: #{mapped_number}")
+                
+                client.publish("clinic/display/all", json.dumps({
+                "number": mapped_number,
+                "doctor": doctor_node
+                }))
+                print(f"📺 Broadcast sent to shared display for doctor {doctor_node}: #{mapped_number}")
             else:
+          
                 client.publish(response_topic, json.dumps({"uid": "NO_PATIENT"}))
                 print(f"⚠️ No patients to send to doctor {doctor_node}")
 
+                # 🔄 Broadcast "0" to all individual doctor display topics
+                for doc_id in ["1", "2", "3", "4"]:
+                    client.publish(f"clinic/display/{doc_id}/number", json.dumps({"number": 0}))
+                    print(f"📺 Sent 0 to clinic/display/{doc_id}/number")
+
+                # 🖥 Send "0" for all doctors to shared summary display
+                for doc_id in ["1", "2", "3", "4"]:
+                    client.publish("clinic/display/all", json.dumps({
+                        "number": 0,
+                        "doctor": doc_id
+                    }))
+                    print(f"📺 Broadcasted 0 to shared display for doctor {doc_id}")
+
+                # 👨‍⚕️ Notify all doctor nodes as well
+                for doc_id in ["1", "2", "3", "4"]:
+                    client.publish(f"clinic/doctor/{doc_id}/response", json.dumps({
+                        "uid": "NO_PATIENT",
+                        "number": 0,
+                        "doctor": doc_id
+                    }))
+                    print(f"📨 Sent NO_PATIENT to clinic/doctor/{doc_id}/response")
 
         # ==== DOCTOR REMOVES PATIENT ====
         elif topic_parts[0] == "clinic" and topic_parts[1] == "doctor" and topic_parts[3] == "remove":
@@ -190,6 +223,7 @@ def on_message(client, userdata, msg):
             save_queues()
             print(f"🧹 Doctor node {topic_parts[2]} requested queue clear. All queues cleared.")
             client.publish(f"clinic/doctor/{topic_parts[2]}/response", json.dumps({"status": "queues_cleared"}))
+            
 
         # ==== DEBUG QUEUE STATUS ====
         elif msg.topic == "queue/debug":
