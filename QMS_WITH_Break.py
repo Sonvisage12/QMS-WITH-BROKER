@@ -65,7 +65,7 @@ def daily_queue_reset():
     while True:
         now = datetime.now()
         print("🕒 Checking time:", now.strftime("%Y-%m-%d %H:%M:%S"))  # Add this line
-        if now.hour == 10 and now.minute == 6:
+        if now.hour == 16 and now.minute == 13:
             print("🧹 It's 10:05 AM — clearing all queues...")
             sharedQueue.clear()
             queueA.clear()
@@ -211,7 +211,7 @@ def on_message(client, userdata, msg):
                   print(f"📺 Broadcasted 0 to shared display for doctor {doctor_node}")
               
                   client.publish(f"clinic/doctor/{doctor_node}/response", json.dumps({
-                      "uid": "NO_PATIENT",
+                      "uid": "BREAK",
                       "number": 0,
                       "doctor": doctor_node
                   }))
