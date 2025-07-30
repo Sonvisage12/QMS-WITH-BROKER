@@ -24,7 +24,7 @@ Preferences prefs;
 bool solenoidState = false;  // False = OFF, True = ON
 unsigned long lastToggle = 0;
 int N;
-const int nodeID = 3;
+const int nodeID = 4;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 WiFiClient espClient;
@@ -91,6 +91,13 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     lcd.setCursor(3, 0); lcd.print("DESK STAFF");
     lcd.setCursor(3, 1); lcd.print("ON BREAK");
     patientReady = false;
+   prefs.begin("solenoid", false);
+   prefs.putBool("state", solenoidState);
+   prefs.end();
+
+  // Display on LCD at (15,1)
+  lcd.setCursor(15, 1);
+  lcd.print(solenoidState ? "O" : "C");
 
     // Publish zero to display
     char displayTopic[64];
@@ -118,6 +125,15 @@ if (doc.containsKey("status") && doc["status"] == "queues_cleared") {
   sprintf(displayTopic, "clinic/display/%d", nodeID);
   mqttClient.publish(displayTopic, String(patientNum).c_str());
   Serial.printf("📺 Sent to display topic: %s => %d\n", displayTopic, patientNum);
+  prefs.begin("solenoid", false);
+  prefs.putBool("state", solenoidState);
+  prefs.end();
+
+  // Display on LCD at (15,1)
+  lcd.setCursor(15, 1);
+  lcd.print(solenoidState ? "O" : "C");
+  lcd.setCursor(15, 0);
+  lcd.print("G");
 
   Serial.printf("✅ Received UID: %s | Number: %d\n", currentUID, patientNum);
 }
@@ -258,10 +274,11 @@ if (currentSolenoidButtonState == HIGH && lastSolenoidButtonState == LOW) {
   prefs.begin("solenoid", false);
   prefs.putBool("state", solenoidState);
   prefs.end();
-
+   lcd.setCursor(15, 0);
+  lcd.print("G");
   // Display on LCD at (15,1)
   lcd.setCursor(15, 1);
-  lcd.print(solenoidState ? "1" : "0");
+  lcd.print(solenoidState ? "O" : "C");
 
   delay(300);  // debounce
 }
