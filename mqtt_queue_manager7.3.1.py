@@ -238,7 +238,7 @@ def on_message(client, userdata, msg):
             k +=1
             print(k)
 
-            if k>lenB:
+            if k<=lenB:
                 blendedQueue = build_blended_queue(list(sharedQueue), list(queueB))
             else:
                 blendedQueue = build_blended_queue1(list(sharedQueue), list(queueB))
